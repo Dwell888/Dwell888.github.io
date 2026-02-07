@@ -1,224 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<title>flightreacts.xyz</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>counter strik</title>
+  <style>
+    body {
+      margin: 0;
+      background: #2b2b2b;
+      font-family: Arial, Comic Sans MS, sans-serif;
+      cursor: crosshair;
+      overflow: hidden;
+    }
 
-<style>
-:root {
-  --green: #00ff9c;
-  --red: #ff2d2d;
-  --bg: #06080a;
-}
+    .hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
 
-* {
-  box-sizing: border-box;
-}
+    .health {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: red;
+      color: white;
+      padding: 5px;
+      font-size: 22px;
+    }
 
-body {
-  margin: 0;
-  background: radial-gradient(circle at top, #0b1220, var(--bg));
-  color: #e5e7eb;
-  font-family: monospace;
-  overflow-x: hidden;
-}
+    .ammo {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: yellow;
+      color: black;
+      padding: 5px;
+      font-size: 22px;
+    }
 
-.noise {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: repeating-linear-gradient(
-    0deg,
-    #fff 0px,
-    #fff 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  z-index: 999;
-}
+    .chat {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      width: 300px;
+      height: 200px;
+      background: rgba(0,0,0,0.6);
+      color: lime;
+      font-size: 12px;
+      padding: 5px;
+      overflow: hidden;
+    }
 
-header {
-  padding: 4rem 2rem;
-  text-align: center;
-}
+    .enemy {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: blue;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
 
-h1 {
-  font-size: clamp(2.5rem, 8vw, 6rem);
-  letter-spacing: -0.04em;
-  color: var(--green);
-  text-shadow: 0 0 25px rgba(0,255,156,.4);
-}
+    .warning {
+      position: fixed;
+      top: 40%;
+      width: 100%;
+      text-align: center;
+      font-size: 48px;
+      color: red;
+      animation: blink 0.4s infinite;
+    }
 
-.subtitle {
-  opacity: 0.8;
-  margin-top: 1rem;
-  font-size: 1.1rem;
-}
-
-.glitch {
-  animation: glitch 2.5s infinite;
-}
-
-@keyframes glitch {
-  0% { transform: none; }
-  20% { transform: skewX(1deg); }
-  40% { transform: translateX(-1px); }
-  60% { transform: translateX(2px); }
-  80% { transform: skewX(-1deg); }
-}
-
-.panel {
-  max-width: 900px;
-  margin: 2rem auto;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 0 40px rgba(0,0,0,.6);
-}
-
-.log {
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.log span {
-  display: block;
-}
-
-.green { color: var(--green); }
-.red { color: var(--red); }
-
-.crosshair {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-
-.crosshair::before,
-.crosshair::after {
-  content: "";
-  position: absolute;
-  background: var(--green);
-  opacity: 0.6;
-}
-
-.crosshair::before {
-  width: 2px;
-  height: 20px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.crosshair::after {
-  height: 2px;
-  width: 20px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-button {
-  background: transparent;
-  border: 1px solid var(--green);
-  color: var(--green);
-  padding: 0.8rem 1.5rem;
-  font-family: inherit;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-button:hover {
-  background: var(--green);
-  color: black;
-  box-shadow: 0 0 20px rgba(0,255,156,.6);
-}
-
-.footer {
-  text-align: center;
-  opacity: 0.5;
-  padding: 3rem 1rem;
-}
-</style>
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
 </head>
 
 <body>
-<div class="noise"></div>
-<div class="crosshair"></div>
 
-<header>
-  <h1 class="glitch">FLIGHT REACTS</h1>
-  <div class="subtitle">
-    counter-strike website<br>
-    low tickrate reality simulator
-  </div>
-</header>
-
-<div class="panel">
-  <div class="log" id="log">
-    <span class="green">[MATCH FOUND]</span>
-    <span>[SYSTEM] warming up brain cells...</span>
-    <span>[CT] buy smoke. no wait. don’t.</span>
-    <span class="red">[T] someone just wide swung reality</span>
-    <span>[ANNOUNCER] BOMB HAS BEEN PLANTED (mentally)</span>
+<div class="hud">
+  <div class="health">HP: 137</div>
+  <div class="ammo">AMMO: 2 / 999</div>
+  <div class="chat" id="chat">
+    <div>player1: rush b</div>
+    <div>player2: no</div>
+    <div>player3: why lag</div>
+    <div>player4: he's cheating</div>
   </div>
 </div>
 
-<div class="panel" style="text-align:center">
-  <p>
-    this website peeks you first.<br>
-    you are already flashed.<br>
-    your dpi is wrong.
-  </p>
-  <button onclick="panic()">PANIC SPRAY</button>
-</div>
+<div class="enemy" id="enemy"></div>
 
-<div class="panel">
-  <strong>TACTICAL NOTES:</strong>
-  <ul>
-    <li>eco round is a mindset</li>
-    <li>sound cue was fake</li>
-    <li>he’s one hit (lie)</li>
-    <li>defusing through smoke because faith</li>
-    <li>site coded at 3am after losing 3 in a row</li>
-  </ul>
-</div>
-
-<div class="footer">
-  flightreacts.xyz<br>
-  planted by mistake
+<div class="warning" id="warning" style="display:none;">
+  YOU ARE FLASHED
 </div>
 
 <script>
-const lines = [
-  "[RADIO] Flashbang out!",
-  "[RADIO] Negative.",
-  "[RADIO] Need backup.",
-  "[???] why was he there",
-  "[SYSTEM] tickrate dropped",
-  "[SYSTEM] trust your crosshair",
-  "[ANNOUNCER] last player standing",
-  "[TEAM] just save bro",
-  "[TEAM] no we go"
+let ammo = 2;
+let hp = 137;
+
+const chatLines = [
+  "nice hacks",
+  "HOW WAS THAT A HEADSHOT",
+  "lag lag lag",
+  "my mouse moved",
+  "tickrate issue",
+  "reported",
+  "save save save",
+  "WHY PEEK"
 ];
 
-function panic() {
-  const log = document.getElementById("log");
-  const line = document.createElement("span");
-  line.textContent = lines[Math.floor(Math.random() * lines.length)];
-  line.className = Math.random() > 0.7 ? "red" : "green";
-  log.appendChild(line);
-  log.scrollTop = log.scrollHeight;
-}
+document.addEventListener("click", () => {
+  ammo--;
+  if (ammo < 0) ammo = 0;
+  document.querySelector(".ammo").textContent = "AMMO: " + ammo + " / 999";
 
-document.addEventListener("mousemove", e => {
-  document.body.style.backgroundPosition =
-    `${e.clientX / 50}px ${e.clientY / 50}px`;
+  if (Math.random() > 0.8) {
+    document.getElementById("warning").style.display = "block";
+    setTimeout(() => {
+      document.getElementById("warning").style.display = "none";
+    }, 1200);
+  }
+
+  const chat = document.getElementById("chat");
+  const line = document.createElement("div");
+  line.textContent = "player" + Math.floor(Math.random()*5) + ": " +
+    chatLines[Math.floor(Math.random()*chatLines.length)];
+  chat.appendChild(line);
+  chat.scrollTop = chat.scrollHeight;
 });
+
+setInterval(() => {
+  hp -= Math.floor(Math.random() * 5);
+  if (hp < 0) hp = 0;
+  document.querySelector(".health").textContent = "HP: " + hp;
+
+  const enemy = document.getElementById("enemy");
+  enemy.style.top = Math.random() * 90 + "%";
+  enemy.style.left = Math.random() * 90 + "%";
+}, 800);
+
+setInterval(() => {
+  document.body.style.filter =
+    Math.random() > 0.7 ? "blur(2px)" : "none";
+}, 300);
 </script>
+
 </body>
 </html>
