@@ -1,22 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>demo</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0f172a;
-      color: white;
-      display: grid;
-      place-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    h1 { font-size: 3rem; }
-  </style>
+<meta charset="UTF-8" />
+<title>flightreacts.xyz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --green: #00ff9c;
+  --red: #ff2d2d;
+  --bg: #06080a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #0b1220, var(--bg));
+  color: #e5e7eb;
+  font-family: monospace;
+  overflow-x: hidden;
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: repeating-linear-gradient(
+    0deg,
+    #fff 0px,
+    #fff 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  z-index: 999;
+}
+
+header {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  letter-spacing: -0.04em;
+  color: var(--green);
+  text-shadow: 0 0 25px rgba(0,255,156,.4);
+}
+
+.subtitle {
+  opacity: 0.8;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.glitch {
+  animation: glitch 2.5s infinite;
+}
+
+@keyframes glitch {
+  0% { transform: none; }
+  20% { transform: skewX(1deg); }
+  40% { transform: translateX(-1px); }
+  60% { transform: translateX(2px); }
+  80% { transform: skewX(-1deg); }
+}
+
+.panel {
+  max-width: 900px;
+  margin: 2rem auto;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 0 40px rgba(0,0,0,.6);
+}
+
+.log {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.log span {
+  display: block;
+}
+
+.green { color: var(--green); }
+.red { color: var(--red); }
+
+.crosshair {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: var(--green);
+  opacity: 0.6;
+}
+
+.crosshair::before {
+  width: 2px;
+  height: 20px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.crosshair::after {
+  height: 2px;
+  width: 20px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+button {
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 0.8rem 1.5rem;
+  font-family: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+button:hover {
+  background: var(--green);
+  color: black;
+  box-shadow: 0 0 20px rgba(0,255,156,.6);
+}
+
+.footer {
+  text-align: center;
+  opacity: 0.5;
+  padding: 3rem 1rem;
+}
+</style>
 </head>
+
 <body>
-  <h1>FlightReacts</h1>
+<div class="noise"></div>
+<div class="crosshair"></div>
+
+<header>
+  <h1 class="glitch">FLIGHT REACTS</h1>
+  <div class="subtitle">
+    counter-strike website<br>
+    low tickrate reality simulator
+  </div>
+</header>
+
+<div class="panel">
+  <div class="log" id="log">
+    <span class="green">[MATCH FOUND]</span>
+    <span>[SYSTEM] warming up brain cells...</span>
+    <span>[CT] buy smoke. no wait. don’t.</span>
+    <span class="red">[T] someone just wide swung reality</span>
+    <span>[ANNOUNCER] BOMB HAS BEEN PLANTED (mentally)</span>
+  </div>
+</div>
+
+<div class="panel" style="text-align:center">
+  <p>
+    this website peeks you first.<br>
+    you are already flashed.<br>
+    your dpi is wrong.
+  </p>
+  <button onclick="panic()">PANIC SPRAY</button>
+</div>
+
+<div class="panel">
+  <strong>TACTICAL NOTES:</strong>
+  <ul>
+    <li>eco round is a mindset</li>
+    <li>sound cue was fake</li>
+    <li>he’s one hit (lie)</li>
+    <li>defusing through smoke because faith</li>
+    <li>site coded at 3am after losing 3 in a row</li>
+  </ul>
+</div>
+
+<div class="footer">
+  flightreacts.xyz<br>
+  planted by mistake
+</div>
+
+<script>
+const lines = [
+  "[RADIO] Flashbang out!",
+  "[RADIO] Negative.",
+  "[RADIO] Need backup.",
+  "[???] why was he there",
+  "[SYSTEM] tickrate dropped",
+  "[SYSTEM] trust your crosshair",
+  "[ANNOUNCER] last player standing",
+  "[TEAM] just save bro",
+  "[TEAM] no we go"
+];
+
+function panic() {
+  const log = document.getElementById("log");
+  const line = document.createElement("span");
+  line.textContent = lines[Math.floor(Math.random() * lines.length)];
+  line.className = Math.random() > 0.7 ? "red" : "green";
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+document.addEventListener("mousemove", e => {
+  document.body.style.backgroundPosition =
+    `${e.clientX / 50}px ${e.clientY / 50}px`;
+});
+</script>
 </body>
 </html>
