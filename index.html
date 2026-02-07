@@ -1,150 +1,175 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>counter strik</title>
-  <style>
-    body {
-      margin: 0;
-      background: #2b2b2b;
-      font-family: Arial, Comic Sans MS, sans-serif;
-      cursor: crosshair;
-      overflow: hidden;
-    }
-
-    .hud {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .health {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: red;
-      color: white;
-      padding: 5px;
-      font-size: 22px;
-    }
-
-    .ammo {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: yellow;
-      color: black;
-      padding: 5px;
-      font-size: 22px;
-    }
-
-    .chat {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      width: 300px;
-      height: 200px;
-      background: rgba(0,0,0,0.6);
-      color: lime;
-      font-size: 12px;
-      padding: 5px;
-      overflow: hidden;
-    }
-
-    .enemy {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background: blue;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .warning {
-      position: fixed;
-      top: 40%;
-      width: 100%;
-      text-align: center;
-      font-size: 48px;
-      color: red;
-      animation: blink 0.4s infinite;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Bad PvZ</title>
+<style>
+body {
+  margin: 0;
+  background: #4caf50;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+#game {
+  display: grid;
+  grid-template-columns: repeat(9, 80px);
+  gap: 4px;
+  padding: 10px;
+}
+.cell {
+  width: 80px;
+  height: 80px;
+  background: #6ab04c;
+  border: 2px solid #2d3436;
+  text-align: center;
+  line-height: 80px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.zombie {
+  background: brown;
+}
+.plant {
+  background: green;
+}
+#ui {
+  padding: 10px;
+  background: #2d3436;
+}
+</style>
 </head>
 
 <body>
 
-<div class="hud">
-  <div class="health">HP: 137</div>
-  <div class="ammo">AMMO: 2 / 999</div>
-  <div class="chat" id="chat">
-    <div>player1: rush b</div>
-    <div>player2: no</div>
-    <div>player3: why lag</div>
-    <div>player4: he's cheating</div>
-  </div>
+<div id="ui">
+  <span id="level">Level 1</span> |
+  <span id="kills">Kills: 0</span>
 </div>
 
-<div class="enemy" id="enemy"></div>
+<div id="game"></div>
 
-<div class="warning" id="warning" style="display:none;">
-  YOU ARE FLASHED
-</div>
+<h3>Global Leaderboard</h3>
+<ol id="leaderboard"></ol>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-let ammo = 2;
-let hp = 137;
-
-const chatLines = [
-  "nice hacks",
-  "HOW WAS THAT A HEADSHOT",
-  "lag lag lag",
-  "my mouse moved",
-  "tickrate issue",
-  "reported",
-  "save save save",
-  "WHY PEEK"
-];
-
-document.addEventListener("click", () => {
-  ammo--;
-  if (ammo < 0) ammo = 0;
-  document.querySelector(".ammo").textContent = "AMMO: " + ammo + " / 999";
-
-  if (Math.random() > 0.8) {
-    document.getElementById("warning").style.display = "block";
-    setTimeout(() => {
-      document.getElementById("warning").style.display = "none";
-    }, 1200);
-  }
-
-  const chat = document.getElementById("chat");
-  const line = document.createElement("div");
-  line.textContent = "player" + Math.floor(Math.random()*5) + ": " +
-    chatLines[Math.floor(Math.random()*chatLines.length)];
-  chat.appendChild(line);
-  chat.scrollTop = chat.scrollHeight;
+// 🔥 PASTE YOUR FIREBASE CONFIG HERE
+firebase.initializeApp({
+  apiKey: "AIzaSyDTVwYsjkGD7a6Ji1Q4p-n8Doud4mqGTk8",
+  authDomain: "pvweb-d1809.firebaseapp.com",
+  databaseURL: "pvweb-d1809.firebaseio.com",
+  projectId: "pvweb-d1809"
 });
 
-setInterval(() => {
-  hp -= Math.floor(Math.random() * 5);
-  if (hp < 0) hp = 0;
-  document.querySelector(".health").textContent = "HP: " + hp;
+const db = firebase.database();
 
-  const enemy = document.getElementById("enemy");
-  enemy.style.top = Math.random() * 90 + "%";
-  enemy.style.left = Math.random() * 90 + "%";
-}, 800);
+const username = prompt("Enter your PvZ username") || "Anonymous";
 
-setInterval(() => {
-  document.body.style.filter =
-    Math.random() > 0.7 ? "blur(2px)" : "none";
-}, 300);
+const lanes = 5;
+const cols = 9;
+let level = 1;
+let kills = 0;
+
+const game = document.getElementById("game");
+const killsEl = document.getElementById("kills");
+const levelEl = document.getElementById("level");
+
+let grid = [];
+
+function createGrid() {
+  game.innerHTML = "";
+  grid = [];
+  for (let i = 0; i < lanes * cols; i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.onclick = () => placePlant(i);
+    game.appendChild(cell);
+    grid.push({ plant: false, zombie: false });
+  }
+}
+
+function placePlant(i) {
+  if (!grid[i].plant) {
+    grid[i].plant = true;
+    game.children[i].classList.add("plant");
+    game.children[i].textContent = "🌱";
+  }
+}
+
+function spawnZombie() {
+  const lane = Math.floor(Math.random() * lanes);
+  const index = lane * cols + (cols - 1);
+  grid[index].zombie = true;
+  game.children[index].classList.add("zombie");
+  game.children[index].textContent = "🧟";
+}
+
+function tick() {
+  for (let i = 0; i < grid.length; i++) {
+    if (grid[i].zombie) {
+      const next = i - 1;
+      if (next < 0) continue;
+
+      if (grid[next].plant) {
+        grid[i].zombie = false;
+        grid[next].plant = false;
+        game.children[i].className = "cell";
+        game.children[next].className = "cell";
+        game.children[next].textContent = "";
+        kills++;
+        killsEl.textContent = "Kills: " + kills;
+        updateScore();
+      } else {
+        grid[i].zombie = false;
+        grid[next].zombie = true;
+        game.children[i].className = "cell";
+        game.children[i].textContent = "";
+        game.children[next].classList.add("zombie");
+        game.children[next].textContent = "🧟";
+      }
+    }
+  }
+}
+
+function updateScore() {
+  db.ref("scores/" + username).set(kills);
+}
+
+function loadLeaderboard() {
+  db.ref("scores").on("value", snap => {
+    const data = snap.val() || {};
+    const sorted = Object.entries(data)
+      .sort((a,b) => b[1] - a[1])
+      .slice(0, 10);
+
+    const list = document.getElementById("leaderboard");
+    list.innerHTML = "";
+    sorted.forEach(([name, score]) => {
+      const li = document.createElement("li");
+      li.textContent = `${name}: ${score}`;
+      list.appendChild(li);
+    });
+  });
+}
+
+function nextLevel() {
+  if (level < 10) {
+    level++;
+  } else {
+    level = 11; // infinite
+  }
+  levelEl.textContent = "Level " + level;
+}
+
+createGrid();
+loadLeaderboard();
+
+setInterval(spawnZombie, 2000);
+setInterval(tick, 800);
+setInterval(nextLevel, 15000);
 </script>
 
 </body>
